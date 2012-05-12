@@ -1,0 +1,7 @@
+Usage:
+
+include the following in <head>
+<link href="highlightJavascript.css" rel="stylesheet" />
+<script src="highlightJavascript.min.js"></script>
+
+highlightJavascript includes javascript language highlighting built right in, but you can view the language file at language/javascript.js to build your own.
