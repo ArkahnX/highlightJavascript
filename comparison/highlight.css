@@ -1,0 +1,77 @@
+code .keyword {
+	color:green;
+}
+
+code .operator {
+	font-weight:bold;
+}
+
+code .quote {
+	color:red;
+}
+
+code .comment {
+	color:#a0a0a0;
+}
+
+pre ol {
+	list-style-type:decimal-leading-zero;
+	font-family:Consolas, "Courier New";
+	color:#c0c0c0;
+	margin-left:3em;
+	padding:0;
+}
+
+
+pre li {
+	background-color:#f0f0f0;
+	border-bottom:1px solid #e0e0e0;
+}
+
+pre li span {
+	font-family:Consolas, "Courier New";
+	color:black;
+}
+
+/* C# */
+code.csharp span.quote {
+	color:#a31515;
+}
+
+code.csharp span.keyword {
+	color:#0000ff;
+}
+
+code.csharp span.comment {
+	color:#008000;
+}
+
+/* VB */
+code.vb span.comment {
+	color:#008000;
+}
+
+code.vb span.keyword {
+	color:#0000ff;
+}
+
+code.vb span.quote {
+	color:#a31515;
+}
+
+/* PHP */
+code.php.highlighted {
+	color:#0000BB;
+}
+
+code.php span.operator {
+	color:#007700;
+}
+
+code.php span.quote {
+	color:#DD0000;
+}
+
+code.php span.comment {
+	color:#FF8000;
+}
