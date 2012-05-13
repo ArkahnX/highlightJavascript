@@ -13,33 +13,362 @@ body, html {
 </head>
 <body>
 <pre><code class="js">/**
+ * @fileOverview The top section of this document contains basic blocks, the second half contains functions to use the blocks.
+ * @author <a href="mailto:biomech.arkahnx@gmail.com">Christopher Hall</a>
+ * @version 0.1.1 05/05/2012
+ */
+/**
+ * Object to store human readable blocks
+ * @type {Object}
+ */
+var blocks = {};
+/**
+ * @name resource
+ * @namespace
+ * @type {Object}
+ * @description Definition of a resource.<pre><code class="js">{
+	"name": "",
+	"description": "",
+	"id": "",
+	"locationId": ""
+}</code></pre>
+ * @property {String} name        Name used when referring to this block to the player
+ * @property {String} description Description for the block to the player where applicable
+ * @property {String} id          Unique number and letter combination used to find blocks internally
+ * @property {String} locationId  Unique number and letter combination used to find blocks internally, this id will be a duplicate of one {@link tile} block
+ * @type {[type]}
+ */
+var resource = blocks["resource"] = {
+	"name": "",
+	"description": "",
+	"id": "",
+	"locationId": ""
+};
+/**
+ * @name  requirement
+ * @namespace
+ * @type {Object}
+ * @description  Infers "name" and "description" details from {@link resource}.<pre><code class="js">{
+	"name": "",
+	"id": "",
+	"value": 0
+}</code></pre>
+ * @borrows resource#name         as #realName
+ * @borrows resource#description  as #description
+ * @property {String} name        (OwnValue) Value to use in placement of realName should a delay occur. Name and description are inferred from the id
+ * @property {String} referenceId (OwnValue) Unique number and letter combination used to find blocks internally, this id will be a duplicate of one {@link resource} block
+ * @property {Number} value       (OwnValue) Amount of a resource required
+ */
+var requirement = blocks["requirement"] = {
+	"name": "",
+	"id": "",
+	"value": 0
+};
+/**
+ * @name  category
+ * @namespace
+ * @type {Object}
+ * @class
+ * @description Category block.<pre><code class="js">{
+	"name": "",
+	"sub": {
+		"name": ""
+	}
+}</code></pre>
+ * @property {String} name The category name
+ * @property {Object} sub  Optional sub category
+ */
+var category = blocks["category"] = {
+	"name": "",
+	"sub": {
+		"name": ""
+	}
+};
+/**
+ * @name weapon
+ * @namespace
+ * @type {Object}
+ * @description  Weapon block.<pre><code class="js">{
+	"name": "",
+	"id": "",
+	"description": "",
+	"weaponType": "",
+	"ammoType": "",
+	"amount": 0
+}</code></pre>
+ * @property {String} id          Unique number and letter combination used to find blocks internally
+ * @property {String} name        Name used when referring to this block to the player
+ * @property {String} description Description for the block to the player where applicable
+ * @property {String} weaponType  Type of weapon
+ * @property {String} ammoType    Type of ammo used by weapon
+ * @property {Number} amount      The default amount of ammo allowed for this weapon
+ */
+var weapon = blocks["weapon"] = {
+	"name": "",
+	"id": "",
+	"description": "",
+	"weaponType": "",
+	"ammoType": "",
+	"amount": 0
+};
+/**
+ * @name simpleWeapon
+ * @namespace
+ * @type {Object}
+ * @description  Infers all data from {@link weapon}.<pre><code class="js">{
+	"name": "",
+	"id": ""
+}</code></pre>
+ * @borrows weapon#name           as #realName
+ * @borrows weapon#description    as #description
+ * @borrows weapon#weaponType     as #weaponType
+ * @borrows weapon#ammoType       as #ammoType
+ * @borrows weapon#amount         as #amount
+ * @property {String} name        (OwnProperty) Value to use in placement of realName should a delay occur. Name and description are inferred from the id
+ * @property {String} referenceId (OwnProperty) Unique number and letter combination used to find blocks internally, this id will be a duplicate of one {@link weapon} block
+ */
+var simpleWeapon = blocks["simpleWeapon"] = blocks["shortcut"] = {
+	"name": "",
+	"id": ""
+};
+var properties = blocks["properties"] = {
+	"deployment": {
+		"constructionTime": 0,
+		"size": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"requirements": []
+	},
+	"production": {
+		"buildingCapacity": 0
+	},
+	"offense": {
+		"weapons": []
+	},
+	"defense": {},
+	"support": {},
+	"static": {
+		"health": 0,
+		"speed": 0,
+	},
+	"event": {
+		"speed": 0,
+		"ignoreWalls": false
+	}
+
+};
+/**
+ * @name  upgrade
+ * @namespace
+ * @type {Object}
+ * @description Upgrade block.<pre><code class="js">{
+	"name": "",
+	"description": "",
+	"id": "",
+	"requirements": [],
+	"effects": null
+}</code></pre>
+ * @property {String} name         Name used when referring to this block to the player
+ * @property {String} id           Unique number and letter combination used to find blocks internally
+ * @property {String} description  Description for the block to the player where applicable
+ * @property {Object} effects      list of properties to overwrite, see {@link properties}
+ * @property {Array}  requirements Cost to apply, Array of {@link requirement}s
+ */
+var upgrade = blocks["upgrade"] = {
+	"name": "",
+	"description": "",
+	"id": "",
+	"requirements": [],
+	"effects": null
+};
+/**
+ * @name  simpleUpgrade
+ * @namespace
+ * @type {Object}
+ * @description  Infers "name", "description" and "requirements" details from {@link upgrade}.<pre><code class="js">{
+	"name": "",
+	"referenceId": "",
+}</code></pre>
+ * @borrows upgrade#name          as #realName
+ * @borrows upgrade#description   as #description
+ * @borrows upgrade#requirements  as #requirements
+ * @property {String} name        (OwnProperty) Value to use in placement of realName should a delay occur. Name and description are inferred from the id
+ * @property {String} referenceId (OwnProperty) Unique number and letter combination used to find blocks internally, this id will be a duplicate of one {@link upgrade} block
+ */
+var simpleUpgrade = blocks["simpleUpgrade"] = {
+	"name": "",
+	"referenceId": "",
+};
+/**
+ * @name  core
+ * @namespace
+ * @type {Object}
+ * @description Generic starting block.<pre><code class="js">{
+	"name": "",
+	"description": "",
+	"category": null,
+	"id": "",
+	"requirements": [],
+	"appliedUpgrades": [],
+	"availableUpgrades": [],
+	"defaultData": null
+}</code></pre>
+ * @property {String} name              Name used when referring to this block to the player
+ * @property {String} id                Unique number and letter combination used to find blocks internally
+ * @property {String} description       Description for the block to the player where applicable
+ * @property {Object} category          Used for selection and classification, see {@link category}
+ * @property {Array}  requirements      Costs to produce, Array of {@link requirement}s
+ * @property {Array}  appliedUpgrades   Applied upgrades, Array of {@link upgrade}s
+ * @property {Array}  availableUpgrades Upgrades available, Array of {@link simpleUpgrade}s
+ * @property {Object} defaultData       Default data of block, can be overridden by upgrade blocks, see {@link properties}
+ */
+var core = blocks["core"] = {
+	"name": "",
+	"description": "",
+	"category": null,
+	"id": "",
+	"requirements": [],
+	"appliedUpgrades": [],
+	"availableUpgrades": [],
+	"defaultData": null
+};
+/**
+ * @name dataObject
+ * @namespace
+ * @type {Object}
+ * @description Sample dataObject variable.<pre><code class="js">{
+	"parametername": {
+		"name": "ParameterName",
+		"value": "ParameterValue",
+		"default": "ParameterDefault"
+	}
+}</code></pre>
+ * @property {String} parametername    lower case ParameterName
+ * @property {String} ParameterName    Name of the parameter to be set
+ * @property {String} ParameterValue   Value to assign to parameterValue
+ * @property {String} ParameterDefault Default value to fall back to if ParameterValue is undefined
+ */
+var dataObject = {
+	"parametername": {
+		"name": "ParameterName",
+		"value": "ParameterValue",
+		"default": "ParameterDefault"
+	}
+}
+
+/**
+ * Functions used to generate blocks
+ */
+/**
+ * @name newBlock
+ * @class
+ * @description  Create a block with prototypical inheritance
+ * @example
+ * newBlock("resource1", {"name":{"value":"Resource One"}}, "resource");
+ * @param  {String} blockName  Name of the block
+ * @param  {Object} dataObject Parameters to fill the block with, see {@link dataObject}
+ * @param  {String} source     Name of source object to use. Must be a local member of data
+ * @return {Object}            Return a formatted Block with inheritance
+ */
+newBlock = function(blockName, dataObject, source) {
+		var block, properties, property;
+		/**
+		 * @memberOf  newBlock
+		 * @inner
+		 * @function
+		 * @description Used to create properties and return a Block object
+		 * @param  {String} blockName  Name of the block
+		 * @param  {Object} dataObject Data to assign to Properties
+		 * @param  {String} sourceName Name of the source used to create the block
+		 * @param  {Object} data       Local reference to data
+		 * @return {Object}            New block with inheritance
+		 */
+		block = function Block(blockName, dataObject, sourceName, data) {
+			this.name = blockName;
+			properties.prototype = data[source].properties;
+			properties.constructor = "properties";
+			this.properties = new properties(dataObject, source, data);
+		};
+		/**
+		 * @memberOf newBlock
+		 * @inner
+		 * @function
+		 * @description Used to store properties and return a Properties object
+		 * @param  {Object} dataObject Data to assign to Properties
+		 * @param  {String} source     Name of source object to use. Must be a local member of data
+		 * @param  {Object} data       Local reference to data
+		 * @return {Object}            List of properties
+		 */
+		properties = function Properties(dataObject, source, data) {
+			for (var attr in dataObject) {
+				if (dataObject.hasOwnProperty(attr)) {
+					property.prototype = data[source].properties[attr];
+					property.constructor = data[source].properties[attr].name;
+					this[attr] = new property(attr, dataObject[attr]);
+				}
+			}
+		};
+		/**
+		 * @memberOf newBlock
+		 * @inner
+		 * @function
+		 * @description Used to assign properties and return a Property object
+		 * @param  {String} name       Name of the property
+		 * @param  {Object} dataObject Values to assign
+		 * @return {Object}            Assigned Property object
+		 */
+		property = function Property(name, dataObject) {
+			this.name = name;
+			this.value = dataObject.value;
+			if (dataObject["default"]) {
+				this["default"] = dataObject["default"];
+			}
+		};
+		if (data[source]) {
+			block.prototype = data[source];
+			block.constructor = data[source].name;
+			return new block(blockName, dataObject, source, data);
+		}
+		return false;
+	};
+/**
+ * @name typeOf
+ * @description  Quick typeOf function used to check for arrays
+ * @example
+ * typeOf(variable, "string");
+ * @param  {Variable} data Input variable to check
+ * @param  {String}   type Type to check for
+ * @return {Boolean}
+ */
+typeOf = function(data, type) {
+	return ({}).toString.call(data).toLowerCase().indexOf(type) > -1;
+};
+/**
  * @name convert
- * @description  Recursive function to convert from human readable data to machine traversable data http://this.is.a/valid.url
+ * @description  Recursive function to convert from human readable data to machine traversable data
  * @example
  * convert(name, object);
  * @param  {String} name   Name of the object
  * @param  {Object} object Object to convert
  * @return {JSON}          JSON valid data
- */"this
-is
-a
-multiline
-string"
-convert = function (name, object) {
+ */
+convert = function(name, object) {
 	var data = {
 		"name": name,
 		"propertyNames": [],
 		"properties": {}
 	};
-	for(var attr in object) {
-		if(object.hasOwnProperty(attr)) {
-			if(typeOf(object[attr], "string") || typeOf(object[attr], "number") || typeOf(object[attr], "array") || typeOf(object[attr], "null") || typeOf(object[attr], "boolean")) {
+	for (var attr in object) {
+		if (object.hasOwnProperty(attr)) {
+			if (typeOf(object[attr], "string") || typeOf(object[attr], "number") || typeOf(object[attr], "array") || typeOf(object[attr], "null") || typeOf(object[attr], "boolean")) {
 				data.propertyNames.push(attr);
 				data.properties[attr] = {
 					"name": attr,
 					"default": object[attr]
 				};
-			} else if(typeOf(object[attr], "object")) {
+			} else if (typeOf(object[attr], "object")) {
 				data.propertyNames.push(attr);
 				data.properties[attr] = convert(attr, object[attr]);
 			} else {
@@ -53,104 +382,29 @@ convert = function (name, object) {
 	}
 	return data;
 };
-
-function Brush() {
-	var keywords = 'break case catch continue ' + 'default delete do else ' + 'for if in instanceof ' + 'new push return super switch ' + 'this throw try typeof while with ' + 'taint unescape length ';
-	var identifiers = 'false true null NaN Infinity ';
-	var constants = 'constructor prototype name value arguments undefined ';
-	var blueBold = 'document window history frame localStorage toString JSON location push eval isNaN parseFloat parseInt escape untaint valueOf toString alert confirm prompt hasOwnProperty ' + 'toString hasOwnProperty call ' + 'indexOf ' + 'getElementById ' + 'toLowerCase toUpperCase ' + 'stringify parse ';
-	var r = SyntaxHighlighter.regexLib;
-	var links = document.links;
-	var numLinks = links.length;
-	var symbols = [];
-	for(var i = 0; i < numLinks; i++) {
-		var currentLink = links[i].href;
-		var start = currentLink.lastIndexOf("symbols/");
-		var end = currentLink.lastIndexOf(".html");
-		var symbolName = currentLink.slice(start + 8.0, end);
-		var periodIndex = symbolName.indexOf(".");
-		if(periodIndex !== -1) {
-			symbolName = symbolName.slice(periodIndex + 1.0);
-		}
-		if(start !== -1) {
-			symbols.push(symbolName);
+/**
+ * @name convertAll
+ * @description  Function to run through all objects in {@link blocks} with {@link convert}
+ * @example
+ * convertAll();
+ * @return {String} JSON formatted string
+ */
+convertAll = function() {
+	var data = {
+		"names": []
+	};
+	for (var attr in blocks) {
+		if (blocks.hasOwnProperty(attr)) {
+			data.names.push(attr);
+			data[attr] = convert(attr, blocks[attr]);
 		}
 	}
-	var numSymbols = symbols.length;
-	var symbolKeywords = "";
-	for(i = 0; i < numSymbols; i++) {
-		if(symbols[i] !== "") {
-			symbolKeywords += symbols[i] + " ";
-		}
-	}
-	this.regexList = [{
-		regex: r.multiLineDoubleQuotedString,
-		css: 'string'
-	}, // double quoted strings
-	{
-		regex: r.multiLineSingleQuotedString,
-		css: 'string'
-	}, // single quoted strings
-	{
-		regex: r.singleLineCComments,
-		css: 'comments'
-	}, // one line comments
-	{
-		regex: r.multiLineCComments,
-		css: 'comments'
-	}, // multiline comments
-	{
-		regex: /\s*#.*/gm,
-		css: 'preprocessor'
-	}, // preprocessor tags like #region and #endregion
-	{
-		regex: /\b[+-]?(?:(?:0x[A-Fa-f0-9]+)|(?:(?:[\d]*\.)?[\d]+(?:[eE][+-]?[\d]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\b/g,
-		css: 'number'
-	}, // numbers
-	{
-		regex: new RegExp(this.getKeywords(blueBold), 'gm'),
-		css: 'blueBold'
-	}, // blueBold
-	{
-		regex: /\{|\}|\(|\)|\[|\]/g,
-		css: 'brackets'
-	}, // common brackets
-	{
-		regex: /\b(?!function|if|else|for|while|with|try)(?:[A-Za-z]|_)[A-Za-z0-9_]*(?=[ \t]*\()/g,
-		css: 'functions'
-	}, // function names
-	{
-		regex: /\b(function|var|let|const|Object|String|Math|Date|Array|RegExp|XRegExp)/gm,
-		css: 'operations'
-	}, // operations
-	{
-		regex: /\/(?:\\.|[^*\\\/])(?:\\.|[^\\\/])*\/[gim]*/g,
-		css: 'regex'
-	}, // regex
-	{
-		regex: /\|\||\&\&|\>|\<|\>\=|\<\=|\=\=|\=\=\=|\!\=|\!\=\=|\+|\+\+|\-|\-\-|\=/gm,
-		css: 'keyword'
-	}, // operations
-	{
-		regex: new RegExp(this.getKeywords(keywords), 'gm'),
-		css: 'keyword'
-	}, // keywords
-	{
-		regex: new RegExp(this.getKeywords(constants), 'gm'),
-		css: 'constants'
-	}, // constants
-	{
-		regex: new RegExp(this.getKeywords(identifiers), 'gm'),
-		css: 'identifier'
-	}, // identifiers
-	{
-		regex: new RegExp(this.getKeywords(symbolKeywords), 'gm'),
-		css: 'symbol'
-	} // symbol
-	];
-	this.forHtmlScript(r.scriptScriptTags);
-};</code></pre>
-<script src="highlightJavascript.min.js"></script>
+	return JSON.stringify(data);
+};
+var data = JSON.parse(convertAll());
+var objects = {};
+convertAll();</code></pre>
+<script src="highlightJavascript.js"></script>
 <script type="text/javascript">
 highlightJavascript.format();
 </script>
