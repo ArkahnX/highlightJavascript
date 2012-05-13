@@ -1,14 +1,14 @@
 Usage:
 ======
 
-include the following resources inside the <pre><head></pre> tag.
+include the following resources inside the <code>&lt;head&gt;</code> tag.
 
-<code><link href="highlightJavascript.css" rel="stylesheet" />
-<script src="highlightJavascript.min.js"></script></code>
+<pre>&lt;link href="highlightJavascript.css" rel="stylesheet" /&gt;
+&lt;script src="highlightJavascript.min.js"&gt;&lt;/script&gt;</pre>
 
-And just before the closing of the <pre><body></pre> tag.
+And just before the closing of the <code>&lt;body></code> tag.
 
-<code><script>highlightJavascript.format();</script></code>
+<code>&lt;script&gt;highlightJavascript.format();&lt;/script&gt;</code>
 
 highlightJavascript includes javascript language highlighting built right in, but you can view the language file at language/javascript.js to build your own.
 
