@@ -3,8 +3,8 @@ Usage:
 
 include the following resources inside the <code>&lt;head&gt;</code> tag.
 
-<pre>&lt;link href="highlightJavascript.css" rel="stylesheet" /&gt;
-&lt;script src="highlightJavascript.min.js"&gt;&lt;/script&gt;</pre>
+<code>&lt;link href="highlightJavascript.css" rel="stylesheet" /&gt;
+&lt;script src="highlightJavascript.min.js"&gt;&lt;/script&gt;</code>
 
 And just before the closing of the <code>&lt;body&gt;</code> tag.
 
