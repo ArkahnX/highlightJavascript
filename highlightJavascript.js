@@ -353,15 +353,15 @@
 			 * Style for newlines.
 			 */
 			if (options && ((options[selector] && options[selector].indexOf("nolines") > -1) || options.all.indexOf("nolines") > -1)) {
-				element.children[0].style.marginLeft = "5px";
+				element.children[0].style.marginLeft = "-2em";
 				element.children[0].style.listStyleType = "none";
 			} else {
 				lines = ((originalCode.indexOf("\n") !== -1) ? originalCode.split("\n") : originalCode.split("\r")).length;
 				if (lines > 100) {
 					if (lines > 1000) {
-						element.children[0].style.marginLeft = "5em";
+						element.children[0].style.marginLeft = "3em";
 					} else {
-						element.children[0].style.marginLeft = "4em";
+						element.children[0].style.marginLeft = "2em";
 					}
 				}
 			}
