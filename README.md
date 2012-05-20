@@ -50,4 +50,6 @@ Known Limitations:
 
 1. in rare instances the space character in a regular expression, or two regular expressions on the same line will cause parsing issues.
 
-2. html code will be rendered by the browser unless <code>&lt;</code> and <code>&gt;</code> have been parsed into <code>&amp;lt;</code> and <code>&amp;gt;</code>. This includes tags in strings, unless wrapped in a <code>&lt;script&gt;</code> tag.
+2. Compressed code does not format well, as regular expression parsing works best when there are line breaks often. Another syntax highlighter may suit your needs better if you plan on displaying compressed code.
+
+3. html code will be rendered by the browser unless <code>&lt;</code> and <code>&gt;</code> have been parsed into <code>&amp;lt;</code> and <code>&amp;gt;</code>. This includes tags in strings, unless wrapped in a <code>&lt;script&gt;</code> tag.
