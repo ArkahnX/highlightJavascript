@@ -164,13 +164,23 @@
 			 * remove beginning and trailing whitespace for the script to work properly.
 			 */
 			var formatCode = function() {
-				var result = code.split("\n");
-				result[0] = "";
-				result[result.length-1] = "";
-				return result.join("\n");
+				var result = code.replace(internalRegex.whiteSpace, "").split("\n");
+				console.log(result[0].indexOf("<script>"))
+				if(result[0].indexOf("<!--") > -1) {
+					result[0] = result[0].replace("<!--","");
+				}
+				if(result[0].indexOf("<script>") > -1) {
+					result[0] = result[0].replace("<script>","");
+				}
+				if(result[result.length-1].indexOf("-->") > -1) {
+					result[result.length-1] = result[result.length-1].replace("-->","");
+				}
+				if(result[result.length-1].indexOf("</script>") > -1) {
+					result[result.length-1] = result[result.length-1].replace("</script>","");
+				}
+				return result.join("\n").replace(internalRegex.whiteSpace, "");
 			}
 			code = formatCode();
-			code = code.replace(internalRegex.whiteSpace, "");
 			/**
 			 * Functions defined outside of all loops in order to prevent having to recreate them repeatedly.
 			 */
