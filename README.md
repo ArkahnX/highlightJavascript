@@ -10,7 +10,7 @@ And just before the closing of the <code>&lt;body&gt;</code> tag.
 
 <code>&lt;script&gt;highlightJavascript.format();&lt;/script&gt;</code>
 
-highlight code within a <code>&lt;pre&gt;&lt;code class="js"&gt;&lt;script&gt;...&lt;/script&gt;&lt;/code&gt;&lt;/pre&gt;</code>
+highlight code with <code>&lt;pre&gt;&lt;code class="js"&gt;&lt;script&gt;...&lt;/script&gt;&lt;/code&gt;&lt;/pre&gt;</code> or <code>&lt;pre&gt;&lt;code class="js"&gt;&lt;!--...--&gt;&lt;/code&gt;&lt;/pre&gt;</code>
 
 highlightJavascript includes javascript language highlighting built right in, but you can view the language file at language/javascript.js to build your own.
 
@@ -51,5 +51,3 @@ Known Limitations:
 1. in rare instances the space character in a regular expression, or two regular expressions on the same line will cause parsing issues.
 
 2. Compressed code does not format well, as regular expression parsing works best when there are line breaks often. Another syntax highlighter may suit your needs better if you plan on displaying compressed code.
-
-3. html code will be rendered by the browser unless <code>&lt;</code> and <code>&gt;</code> have been parsed into <code>&amp;lt;</code> and <code>&amp;gt;</code>. This includes tags in strings, unless wrapped in a <code>&lt;script&gt;</code> tag.

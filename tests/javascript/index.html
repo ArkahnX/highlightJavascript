@@ -1,7 +1,19 @@
-/**
- * highlightJavascript.js V0.9
- * New in V0.9 - first stable release! Optomizations and comments to be added for 1.0
- */
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Sample sh</title>
+<link href="highlightJavascript.css" rel="stylesheet" />
+<style>
+body, html {
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+<pre><code class="js">
+	<script>
 (function(window) {
 	"use strict";
 	var document = window.document;
@@ -24,7 +36,7 @@
 				 * is not followed by spaces, letters or numbers.
 				 * case insensitive.
 				 */
-				regex1: /\/(?![\*])(?:[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim\040]*(?=\,|\.|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
+				regex1: /\/(?![\*])(?:[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim]*(?=\,|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
 				/**
 				 * regex with whitespace
 				 * matches /
@@ -35,7 +47,7 @@
 				 * is not followed by spaces, letters or numbers.
 				 * case insensitive.
 				 */
-				regex2: /\/(?![\*])(?:\040*[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim\040]*(?=\,|\.|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
+				regex2: /\/(?![\*])(?:\040*[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim]*(?=\,|\;|\]|\)|\}|\n|\r|\n\r)(?![a-z0-9\040])/gi,
 				/**
 				 * numbers
 				 */
@@ -127,10 +139,10 @@
 				string: {},
 				code: {},
 				link: {},
-				lessthan: {"0":"&lt;"},
-				greaterthan: {"0":"&gt;"},
-				ampersand: {"0":"&amp;"},
-				quote: {"0":"&quot;"},
+				lessthan: {"0":"<"},
+				greaterthan: {"0":">"},
+				ampersand: {"0":"&"},
+				quote: {"0":"\""},
 				escaped: {}
 			};
 			var regex = {};
@@ -156,20 +168,11 @@
 			// var regex = language.regex;
 			var regexList = language.regexList;
 			var types = ["singleComment", "multiComment", "string"];
-			// characters that break things
-			var badChars = ["\\","<","*","."];
 			var i = 0;
 			var e = 0;
 			/**
 			 * remove beginning and trailing whitespace for the script to work properly.
 			 */
-			var formatCode = function() {
-				var result = code.split("\n");
-				result[0] = "";
-				result[result.length-1] = "";
-				return result.join("\n");
-			}
-			code = formatCode();
 			code = code.replace(internalRegex.whiteSpace, "");
 			/**
 			 * Functions defined outside of all loops in order to prevent having to recreate them repeatedly.
@@ -182,26 +185,22 @@
 			offsetFunctions[1] = function(string) {
 				var zero = 0;
 				var originalString = string;
-				if(string.match(internalRegex.quote)) {
-					string = string.replace(internalRegex.quote, function(string, offset) {
-						return "~{quote-"+zero+"}~";
-					});
-				}
-				if(string.match(internalRegex.ampersand)) {
-					string = string.replace(internalRegex.ampersand, function(string, offset) {
-						return "~{ampersand-"+zero+"}~";
-					});
-				}
-				if(string.match(internalRegex.lessthan)) {
-					string = string.replace(internalRegex.lessthan, function(string, offset) {
-						return "~{lessthan-"+zero+"}~";
-					});
-				}
-				if(string.match(internalRegex.greaterthan)) {
-					string = string.replace(internalRegex.greaterthan, function(string, offset) {
-						return "~{greaterthan-"+zero+"}~";
-					});
-				}
+				string = string.replace(internalRegex.quote, function(string, offset) {
+					data.quote[0] = "&quot;";
+					return "~{quote-"+zero+"}~";
+				});
+				string = string.replace(internalRegex.ampersand, function(string, offset) {
+					data.ampersand[0] = "&amp;";
+					return "~{ampersand-"+zero+"}~";
+				});
+				string = string.replace(internalRegex.lessthan, function(string, offset) {
+					data.lessthan[0] = "&lt;";
+					return "~{lessthan-"+zero+"}~";
+				});
+				string = string.replace(internalRegex.greaterthan, function(string, offset) {
+					data.greaterthan[0] = "&gt;";
+					return "~{greaterthan-"+zero+"}~";
+				});
 				return string
 			};
 			offsetFunctions[2] = function(string, offset) {
@@ -209,7 +208,7 @@
 				return "~{link-" + offset + "}~";
 			};
 			offsetFunctions[3] = function(string, offset, code) {
-				if(badChars.indexOf(code.charAt(offset-1)) > -1 || code.charAt(offset-1) === "\"") {
+				if(code.charAt(offset-1) === "\\" || code.charAt(offset-1) === "<") {
 					return string;
 				}
 				var match = false;
@@ -264,7 +263,7 @@
 				return "~{escaped-" + (e - 1) + "}~";
 			};
 			offsetFunctions[9] = function(string, offset, code) {
-				if(badChars.indexOf(code.charAt(offset-1)) > -1) {
+				if(code.charAt(offset-1) === "\\" || code.charAt(offset-1) === "<") {
 					return string;
 				}
 				//parse escaped characters
@@ -282,11 +281,9 @@
 			/**
 			 * remove any unnecessary formatting
 			 */
-			if(options && options.all.indexOf("parsed") > -1) {
-				code = code.replace(/&amp;/ig,"&");
-				code = code.replace(/&lt;/ig,"<");
-				code = code.replace(/&gt;/ig,">");
-			}
+			// code = code.replace(/&amp;/ig,"&");
+			// code = code.replace(/&lt;/ig,"<");
+			// code = code.replace(/&gt;/ig,">");
 			/**
 			 * save links
 			 */
@@ -315,6 +312,9 @@
 				if (type === "string" && code.match(regex.regex1)) {
 					code = code.replace(regex.regex1, offsetFunctions[9]);
 				}
+				if (type === "string" && code.match(regex.regex2)) {
+					code = code.replace(regex.regex2, offsetFunctions[7]);
+				}
 				if (code.match(regex[type])) {
 					code = code.replace(regex[type], offsetFunctions[3]);
 					for (attr in data[type]) {
@@ -334,9 +334,6 @@
 							data[type][attr] = data[type][attr] + "</span>";
 						}
 					}
-				}
-				if (type === "string" && code.match(regex.regex2)) {
-					code = code.replace(regex.regex2, offsetFunctions[7]);
 				}
 			}
 			/**
@@ -398,11 +395,6 @@
 					"all": ["nolines"]
 				};
 			}
-			if(options === "parsed") {
-				formattedOptions = {
-					"all": ["parsed"]
-				};
-			}
 		}
 		codeList = document.querySelectorAll("pre code[class]");
 		for (i = 0; i < codeList.length; i++) {
@@ -426,7 +418,7 @@
 	};
 	highlightJavascript.language = {};
 	(function(sh) {
-		var nativeVar = ["__defineGetter__", "__defineSetter__", "__lookupGetter__", "__lookupSetter__", "$1", "$2", "$3", "$4", "$5", "$6", "$7", "$8", "$9", "$_", "$input", "Array", "Boolean", "ChartoUTF8", "Date", "E", "Function", "JSON", "LN10", "LN2", "LOG10E", "LOG2E", "Math", "Number", "Object", "PI", "RegExp", "SQRT1_2", "SQRT2", "String", "UTC", "abs", "acos", "anchor", "apply", "asin", "atan", "atan2", "big", "bind", "blink", "bold", "call", "ceil", "charAt", "charCodeAt", "concat", "cos", "create", "defineProperties", "defineProperty", "document", "every", "exp", "filter", "fixed", "floor", "fontcolor", "fontsize", "forEach", "freeze", "getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getOwnPropertyDescriptor", "getOwnPropertyNames", "getPrototypeOf", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDate", "getUTCDay", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "hasOwnProperty", "indexOf", "is", "isExtensible", "isFrozen", "isPrototypeOf", "isSealed", "italics", "join", "lastIndexOf", "link", "localeCompare", "log", "map", "match", "max", "min", "now", "parse", "pop", "pow", "preventExtensions", "propertyIsEnumerable", "push", "random", "reduce", "reduceRight", "replace", "reverse", "round", "seal", "search", "setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear", "shift", "sin", "slice", "small", "some", "sort", "splice", "split", "sqrt", "strike", "stringify", "sub", "substr", "substring", "sup", "tan", "toDateString", "toExponential", "toFixed", "toGMTDateString", "toISODateString", "toJSON", "toLocaleDateString", "toLocaleLowerCase", "toLocaleString", "toLocaleTimeString", "toLocaleUpperCase", "toLowerCase", "toPrecision", "toString", "toTimeString", "toUTCString", "toUpperCase", "trim", "trimLeft", "trimRight", "unshift", "valueOf", "window"];
+		var nativeVar = ["__defineGetter__", "__defineSetter__", "__lookupGetter__", "__lookupSetter__", "$1", "$2", "$3", "$4", "$5", "$6", "$7", "$8", "$9", "$_", "$input", "Array", "Boolean", "ChartoUTF8", "Date", "E", "Function", "JSON", "LN10", "LN2", "LOG10E", "LOG2E", "Math", "Number", "Object", "PI", "RegExp", "SQRT1_2", "SQRT2", "String", "UTC", "abs", "acos", "anchor", "apply", "asin", "atan", "atan2", "big", "bind", "blink", "bold", "call", "ceil", "charAt", "charCodeAt", "concat", "cos", "create", "defineProperties", "defineProperty", "document", "every", "exp", "filter", "fixed", "floor", "fontcolor", "fontsize", "forEach", "freeze", "getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getOwnPropertyDescriptor", "getOwnPropertyNames", "getPrototypeOf", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDate", "getUTCDay", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "hasOwnProperty", "indexOf", "isExtensible", "isFrozen", "isPrototypeOf", "isSealed", "italics", "join", "lastIndexOf", "link", "localeCompare", "log", "map", "match", "max", "min", "now", "parse", "pop", "pow", "preventExtensions", "propertyIsEnumerable", "push", "random", "reduce", "reduceRight", "replace", "reverse", "round", "seal", "search", "setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear", "shift", "sin", "slice", "small", "some", "sort", "splice", "split", "sqrt", "strike", "stringify", "sub", "substr", "substring", "sup", "tan", "toDateString", "toExponential", "toFixed", "toGMTDateString", "toISODateString", "toJSON", "toLocaleDateString", "toLocaleLowerCase", "toLocaleString", "toLocaleTimeString", "toLocaleUpperCase", "toLowerCase", "toPrecision", "toString", "toTimeString", "toUTCString", "toUpperCase", "trim", "trimLeft", "trimRight", "unshift", "valueOf", "window"];
 		var reserved = ["function", "var", "let", "const", "void", "native"];
 		var constructs = ["if", "for", "while", "with", "else", "return", "break", "new", "in", "switch", "try", "catch", "case"];
 		var lang = ["NaN", "true", "false", "undefined", "null"];
@@ -478,3 +470,11 @@
 	}(highlightJavascript));
 	window.highlightJavascript = highlightJavascript;
 }(window));
+</script>
+</code></pre>
+<script src="highlightJavascript.js"></script>
+<script type="text/javascript">
+highlightJavascript.format();
+</script>
+</body>
+</html>
