@@ -5,12 +5,10 @@
 	var lang = ["NaN", "true", "false", "undefined", "null"];
 	var constant = ["arguments", "caller", "constructor", "keys", "prototype", "MAX_VALUE", "MIN_VALUE", "NEGATIVE_INFINITY", "POSITIVE_INFINITY", "multiline", "lastMatch", "lastParen", "leftContext", "length", "name", "rightContext", "input"];
 	var regex = {
-		"singleComment": /#.+?(?=\n|\r|$)/ig,
-		"multiComment": /\/\*[\s\S]+?\*\//g,
 		"string": /(?:'[^'\\]*(?:\\.[^'\\]*)*')|(?:"[^"\\]*(?:\\.[^"\\]*)*")/g,
-		"number": /\b[+-]?(?:(?:0x[A-Fa-f0-9]+)|(?:(?:[\d]*\.)?[\d]+(?:[eE][+-]?[\d]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\b(?!\}\~)/g,
-		"variable": /(?:[a-z]+[a-z0-9]*)(?![a-z]*\-[0-9]*)/g,
-		"parameter": /(?:[a-z]+[a-z0-9]*)(?![a-z]*\-[0-9]*)(?=\]|\,|\>)/ig,
+		"number": /[+-]?\b(?:(?:0x[A-Fa-f0-9]+)|(?:(?:[\d]*\.)?[\d]+(?:[eE][+-]?[\d]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\b/g,
+		"variable": /(?:[a-z]+[a-z0-9]*)/g,
+		"parameter": /(?:[a-z]+[a-z0-9]*)(?=\]|\,|\>)/ig,
 		"bracket": /\{|\}|\(|\)|\[|\]/g,
 		"focusSelector": /\/+[a-z]*[a-z0-1]*/ig,
 		"function": /\b(?!function|if|else|for|while|with|try)(?:[A-Za-z]|_)[A-Za-z0-9_]*(?=[ \t]*\()/g,

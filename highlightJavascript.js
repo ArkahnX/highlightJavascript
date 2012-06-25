@@ -6,395 +6,403 @@
 	"use strict";
 	var document = window.document;
 	var highlightJavascript = function(input, options, language) {
-			var lines, marginLeft, type, name, id, attr;
-			var element = input;
-			var selector = input.id;
-			var originalCode = input.innerHTML;
-			var start = "<ol>";
-			var end = "</ol>";
-			var code = input.innerHTML;
-			var internalRegex = {
-				/**
-				 * regex without whitespace
-				 * matches /
-				 * is not followed by a *
-				 * must contain one or more of pretty much anything
-				 * has a /
-				 * optional flags
-				 * is not followed by spaces, letters or numbers.
-				 * case insensitive.
-				 */
-				regex1: /\/(?![\*])(?:[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim\040]*(?=\,|\.|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
-				/**
-				 * regex with whitespace
-				 * matches /
-				 * is not followed by a *
-				 * must contain one or more of pretty much anything
-				 * has a /
-				 * optional flags
-				 * is not followed by spaces, letters or numbers.
-				 * case insensitive.
-				 */
-				regex2: /\/(?![\*])(?:\040*[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim\040]*(?=\,|\.|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
-				/**
-				 * numbers
-				 */
-				number: /\b[+-]?(?:(?:0x[A-Fa-f0-9]+)|(?:(?:[\d]*\.)?[\d]+(?:[eE][+-]?[\d]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\b(?!\}\~)/g,
-				/**
-				 * matches and forgets '
-				 * matches and forgets ' or \
-				 * matches and forgets \ and all characters
-				 * matches and forgets '
-				 * or
-				 * matches and forgets "
-				 * matches and forgets " or \
-				 * matches and forgets \ and all characters
-				 * matches and forgets "
-				 */
-				string: /(?:'[^'\\]*(?:\\.[^'\\]*)*')|(?:"[^"\\]*(?:\\.[^"\\]*)*")/g,
-				/**
-				 * matches and remembers (1) whitespace
-				 * matches and remembers (1) one character of a letter, number or whitespace
-				 * matches and remembers (2) //
-				 * matches and remembers (2) all characters until new line
-				 * case insensitive
-				 */
-				singleComment: /\/\/.+?(?=\n|\r|$)/ig,
-				/**
-				 * matches / *
-				 * matches any whitespace and non whitespace
-				 * matches * /
-				 */
-				multiComment: /\/\*[\s\S]+?\*\//g,
-				/**
-				 * matches whitespace before or after string
-				 */
-				whiteSpace: /^\s+|\s+$/g,
-				/**
-				 * matches any carage return
-				 */
-				newline: /[\r\n]/g,
-				/**
-				 * matches "
-				 */
-				quote: /"/g,
-				/**
-				 * matches <
-				 */
-				lessthan: /</g,
-				/**
-				 * matches >
-				 */
-				greaterthan: />/g,
-				/**
-				 * matches &
-				 */
-				ampersand: /&/g,
-				/**
-				 * matches ~{
-				 * matches and remembers (1) specific words
-				 * followed by -
-				 * matches and remembers (2) 0-9 one or more times
-				 * followed by }~
-				 * case insensitive
-				 */
-				temporary: /~{(string|link|code|singleComment|multiComment|lessthan|greaterthan|ampersand|quote|escaped)\-([0-9]+)}~/ig,
-				/**
-				 * matches <a
-				 * with href="..."
-				 * and other attributes
-				 * matches >
-				 * matches text
-				 * matches </a>
-				 */
-				link: /\<a\b href\=\"[htpfs]+\:\/\/[^"]+\"[^>]*\>(?:.*?)\<\/a\>/g,
-				/**
-				 * matches <
-				 * matches and forgets ! or /
-				 * matches alpha-numeric tag name
-				 * matches and forgets attributes
-				 * matches >
-				 */
-				tag: /\<(?:\!|\/)?[a-z][a-z0-1\-]\s*(?:[^>]+)?\>/ig,
-				/**
-				 * matches url
-				 */
-				url: /(?:http|ftp|https):\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?/g
-			};
-			var data = {
-				singleComment: {},
-				multiComment: {},
-				string: {},
-				code: {},
-				link: {},
-				lessthan: {"0":"&lt;"},
-				greaterthan: {"0":"&gt;"},
-				ampersand: {"0":"&amp;"},
-				quote: {"0":"&quot;"},
-				escaped: {}
-			};
-			var regex = {};
+		var lines, marginLeft, type, name, id, attr;
+		var element = input;
+		var selector = input.id;
+		var originalCode = input.innerHTML;
+		var start = "<ol>";
+		var end = "</ol>";
+		var code = input.innerHTML;
+		var internalRegex = {
 			/**
-			 * Make a reference to the language values. Javascript language definition is included by default.
+			 * regex without whitespace
+			 * matches /
+			 * is not followed by a *
+			 * must contain one or more of pretty much anything
+			 * has a /
+			 * optional flags
+			 * is not followed by spaces, letters or numbers.
+			 * case insensitive.
 			 */
-			for (var attr in internalRegex) {
-				if (internalRegex.hasOwnProperty(attr)) {
-					if (language.regex[attr]) {
-						regex[attr] = language.regex[attr];
-					} else {
-						regex[attr] = internalRegex[attr];
-					}
-				}
-			}
-			for (var attr in language.regex) {
-				if (language.regex.hasOwnProperty(attr)) {
-					if (!regex[attr]) {
-						regex[attr] = language.regex[attr];
-					}
-				}
-			}
-			// var regex = language.regex;
-			var regexList = language.regexList;
-			var types = ["singleComment", "multiComment", "string"];
-			// characters that break things
-			var badChars = ["\\","<","*","."];
-			var i = 0;
-			var e = 0;
+			regex1: /\/(?![\*])(?:[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim\040]*(?=\,|\.|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
 			/**
-			 * remove beginning and trailing whitespace for the script to work properly.
+			 * regex with whitespace
+			 * matches /
+			 * is not followed by a *
+			 * must contain one or more of pretty much anything
+			 * has a /
+			 * optional flags
+			 * is not followed by spaces, letters or numbers.
+			 * case insensitive.
 			 */
-			var formatCode = function() {
-				var result = code.replace(internalRegex.whiteSpace, "").split("\n");
-				console.log(result[0].indexOf("<script>"))
-				if(result[0].indexOf("<!--") > -1) {
-					result[0] = result[0].replace("<!--","");
-				}
-				if(result[0].indexOf("<script>") > -1) {
-					result[0] = result[0].replace("<script>","");
-				}
-				if(result[result.length-1].indexOf("-->") > -1) {
-					result[result.length-1] = result[result.length-1].replace("-->","");
-				}
-				if(result[result.length-1].indexOf("</script>") > -1) {
-					result[result.length-1] = result[result.length-1].replace("</script>","");
-				}
-				return result.join("\n").replace(internalRegex.whiteSpace, "");
-			}
-			code = formatCode();
+			regex2: /\/(?![\*])(?:\040*[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,\<\.\>\/\?a-z0-9])+\/[gim\040]*(?=\,|\.|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
 			/**
-			 * Functions defined outside of all loops in order to prevent having to recreate them repeatedly.
+			 * numbers
 			 */
-			var offsetFunctions = [];
-			offsetFunctions[0] = function(string, offset) {
-				data.link[offset] = string;
-				return "~{link-" + offset + "}~";
-			};
-			offsetFunctions[1] = function(string) {
-				var zero = 0;
-				var originalString = string;
-				if(string.match(internalRegex.quote)) {
-					string = string.replace(internalRegex.quote, function(string, offset) {
-						return "~{quote-"+zero+"}~";
-					});
-				}
-				if(string.match(internalRegex.ampersand)) {
-					string = string.replace(internalRegex.ampersand, function(string, offset) {
-						return "~{ampersand-"+zero+"}~";
-					});
-				}
-				if(string.match(internalRegex.lessthan)) {
-					string = string.replace(internalRegex.lessthan, function(string, offset) {
-						return "~{lessthan-"+zero+"}~";
-					});
-				}
-				if(string.match(internalRegex.greaterthan)) {
-					string = string.replace(internalRegex.greaterthan, function(string, offset) {
-						return "~{greaterthan-"+zero+"}~";
-					});
-				}
-				return string
-			};
-			offsetFunctions[2] = function(string, offset) {
-				data.link[offset] = "<a href=\"" + string + "\">" + string + "</a>";
-				return "~{link-" + offset + "}~";
-			};
-			offsetFunctions[3] = function(string, offset, code) {
-				if(badChars.indexOf(code.charAt(offset-1)) > -1 || code.charAt(offset-1) === "\"") {
-					return string;
-				}
-				var match = false;
-				if (type === "string" && regex.escaped && string.match(regex.escaped)) {
-					match = true;
-					//parse escaped characters
-					string = string.replace(regex.escaped, offsetFunctions[8]);
-				}
-				/**
-				 * Parse html enabling code out of equation
-				 */
-				string = offsetFunctions[1](string);
-				data[type][offset] = string;
-				return "~{" + type + "-" + offset + "}~";
-			};
-			offsetFunctions[4] = function(string) {
-
-				return "</span>" + string + "<span class=\"" + style + "\">";
-			};
-			offsetFunctions[5] = function(string) {
-				/**
-				 * Parse html enabling code out of equation
-				 */
-				var newString = offsetFunctions[1](string);
-				data.code[e] = "<span class=\"" + regexList[i].css + "\">" + newString + "</span>";
-				e = e + 1;
-				return "~{code-" + (e - 1) + "}~";
-			};
-			offsetFunctions[6] = function(string, name, number) {
-				return data[name][number];
-			};
-			offsetFunctions[7] = function(string, offset, code) {
-				//parse escaped characters
-				if (regex.escaped) {
-					string = string.replace(regex.escaped, offsetFunctions[8]);
-				}
-				/**
-				 * Remove any brackets that may cause the browser to parse the code as html
-				 */
-				var newString = offsetFunctions[1](string);
-				data.code[e] = "<span class=\"regex\">" + newString + "</span>";
-				e = e + 1;
-				return "~{code-" + (e - 1) + "}~";
-			};
-			offsetFunctions[8] = function(string) {
-				/**
-				 * Remove any brackets that may cause the browser to parse the code as html
-				 */
-				var newString = offsetFunctions[1](string);
-				data.escaped[e] = "<span class=\"constant\">" + newString + "</span>";
-				e = e + 1;
-				return "~{escaped-" + (e - 1) + "}~";
-			};
-			offsetFunctions[9] = function(string, offset, code) {
-				if(badChars.indexOf(code.charAt(offset-1)) > -1) {
-					return string;
-				}
-				//parse escaped characters
-				if (regex.escaped) {
-					string = string.replace(regex.escaped, offsetFunctions[8]);
-				}
-				/**
-				 * Remove any brackets that may cause the browser to parse the code as html
-				 */
-				var newString = offsetFunctions[1](string);
-				data.code[e] = "<span class=\"regex\">" + newString + "</span>";
-				e = e + 1;
-				return "~{code-" + (e - 1) + "}~";
-			};
+			number: /\b[+-]?(?:(?:0x[A-Fa-f0-9]+)|(?:(?:[\d]*\.)?[\d]+(?:[eE][+-]?[\d]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\b(?!\}\~)/g,
 			/**
-			 * remove any unnecessary formatting
+			 * matches and forgets '
+			 * matches and forgets ' or \
+			 * matches and forgets \ and all characters
+			 * matches and forgets '
+			 * or
+			 * matches and forgets "
+			 * matches and forgets " or \
+			 * matches and forgets \ and all characters
+			 * matches and forgets "
 			 */
-			if(options && options.all.indexOf("parsed") > -1) {
-				code = code.replace(/&amp;/ig,"&");
-				code = code.replace(/&lt;/ig,"<");
-				code = code.replace(/&gt;/ig,">");
-			}
+			string: /(?:'[^'\\]*(?:\\.[^'\\]*)*')|(?:"[^"\\]*(?:\\.[^"\\]*)*")/g,
 			/**
-			 * save links
+			 * matches and remembers (1) whitespace
+			 * matches and remembers (1) one character of a letter, number or whitespace
+			 * matches and remembers (2) //
+			 * matches and remembers (2) all characters until new line
+			 * case insensitive
 			 */
-			code = code.replace(regex.link, offsetFunctions[0])
+			singleComment: /\/\/.+?(?=\n|\r|$)/ig,
 			/**
-			 * Used to fix issue caused by <pre><code class="">...</code></pre> being within the code.
-			 * The browser would read the tags and implement them, causing undesired effects.
-			 * In reality we want the tags to show up as text, not be rendered.
+			 * matches / *
+			 * matches any whitespace and non whitespace
+			 * matches * /
 			 */
-
+			multiComment: /\/\*[\s\S]+?\*\//g,
 			/**
-			 * Interpret urls as links.
+			 * matches whitespace before or after string
 			 */
-			if (code.match(regex.url)) {
-				code = code.replace(regex.url, offsetFunctions[2]);
-			}
+			whiteSpace: /^\s+|\s+$/g,
 			/**
-			 * Comment and String parsing are practically the same, with different parameters being the only difference, so we optomize by using this loop to avoid code duplication.
-			 * Comment and string regex to look for is provided by the language definition.
+			 * matches any carage return
 			 */
-			for (i = 0; i < types.length; i++) {
-				type = types[i];
-				/**
-				 * Match regex before comments so that they are mapped out properly
-				 */
-				if (type === "string" && code.match(regex.regex1)) {
-					code = code.replace(regex.regex1, offsetFunctions[9]);
-				}
-				if (code.match(regex[type])) {
-					code = code.replace(regex[type], offsetFunctions[3]);
-					for (attr in data[type]) {
-						/**
-						 * If Object.prototype has been modified we need the below line.
-						 */
-						if (data[type].hasOwnProperty(attr)) {
-							if (type.indexOf("Comment") > -1) {
-								var style = "comment";
-							} else {
-								var style = "string";
-							}
-							data[type][attr] = "<span class=\"" + style + "\">" + data[type][attr];
-							if (data[type][attr].match(regex.newline)) {
-								data[type][attr] = data[type][attr].replace(regex.newline, offsetFunctions[4]);
-							}
-							data[type][attr] = data[type][attr] + "</span>";
-						}
-					}
-				}
-				if (type === "string" && code.match(regex.regex2)) {
-					code = code.replace(regex.regex2, offsetFunctions[7]);
-				}
-			}
+			newline: /[\r\n]/g,
 			/**
-			 * Run through each custom defined regex used by the language.
+			 * matches "
 			 */
-			for (i = 0; i < regexList.length; i++) {
-				if (code.match(regexList[i].regex)) {
-					code = code.replace(regexList[i].regex, offsetFunctions[5]);
-				}
-			}
+			quote: /"/g,
 			/**
-			 * Replace all temporary code placeholders with the parsed values. This prevents duplicate parsing.
+			 * matches <
 			 */
-			while (code.match(regex.temporary)) {
-				code = code.replace(internalRegex.temporary, offsetFunctions[6]);
-			}
-			// if(regex.escaped) {
-			// 	code = code.replace(regex.escaped, offsetFunctions[8]);
-			// }
+			lessthan: /</g,
 			/**
-			 * Split newlines into list items for proper numbering.
+			 * matches >
 			 */
-			if (code.match(regex.newline)) {
-				code = code.split(regex.newline);
-				code = code.join("</span></li><li><span>");
-			}
-			code = "<li><span>" + code + "</span></li>";
+			greaterthan: />/g,
 			/**
-			 * Replace pre tag code with parsed code.
+			 * matches &
 			 */
-			element.innerHTML = (start + code + end);
+			ampersand: /&/g,
 			/**
-			 * Style for newlines.
+			 * matches ~{
+			 * matches and remembers (1) specific words
+			 * followed by -
+			 * matches and remembers (2) 0-9 one or more times
+			 * followed by }~
+			 * case insensitive
 			 */
-			if (options && ((options[selector] && options[selector].indexOf("nolines") > -1) || options.all.indexOf("nolines") > -1)) {
-				element.children[0].style.marginLeft = "5px";
-				element.children[0].style.listStyleType = "none";
-			} else {
-				lines = ((originalCode.indexOf("\n") !== -1) ? originalCode.split("\n") : originalCode.split("\r")).length;
-				if (lines > 100) {
-					if (lines > 1000) {
-						element.children[0].style.marginLeft = "5em";
-					} else {
-						element.children[0].style.marginLeft = "4em";
-					}
-				}
-			}
+			temporary: /~{(string|link|code|singleComment|multiComment|lessthan|greaterthan|ampersand|quote|escaped)\-([0-9]+)}~/ig,
+			/**
+			 * matches <a
+			 * with href="..."
+			 * and other attributes
+			 * matches >
+			 * matches text
+			 * matches </a>
+			 */
+			link: /\<a\b href\=\"[htpfs]+\:\/\/[^"]+\"[^>]*\>(?:.*?)\<\/a\>/g,
+			/**
+			 * matches <
+			 * matches and forgets ! or /
+			 * matches alpha-numeric tag name
+			 * matches and forgets attributes
+			 * matches >
+			 */
+			tag: /\<(?:\!|\/)?[a-z][a-z0-1\-]\s*(?:[^>]+)?\>/ig,
+			/**
+			 * matches url
+			 */
+			url: /(?:http|ftp|https):\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?/g
 		};
+		var data = {
+			singleComment: {},
+			multiComment: {},
+			string: {},
+			code: {},
+			link: {},
+			lessthan: {
+				"0": "&lt;"
+			},
+			greaterthan: {
+				"0": "&gt;"
+			},
+			ampersand: {
+				"0": "&amp;"
+			},
+			quote: {
+				"0": "&quot;"
+			},
+			escaped: {}
+		};
+		var regex = {};
+		/**
+		 * Make a reference to the language values. Javascript language definition is included by default.
+		 */
+		for (var attr in internalRegex) {
+			if (internalRegex.hasOwnProperty(attr)) {
+				if (language.regex[attr]) {
+					regex[attr] = language.regex[attr];
+				} else {
+					regex[attr] = internalRegex[attr];
+				}
+			}
+		}
+		for (var attr in language.regex) {
+			if (language.regex.hasOwnProperty(attr)) {
+				if (!regex[attr]) {
+					regex[attr] = language.regex[attr];
+				}
+			}
+		}
+		// var regex = language.regex;
+		var regexList = language.regexList;
+		var types = ["singleComment", "multiComment", "string"];
+		// characters that break things
+		var badChars = ["\\", "<", "*", "."];
+		var i = 0;
+		var e = 0;
+		/**
+		 * remove beginning and trailing whitespace for the script to work properly.
+		 */
+		var formatCode = function() {
+			var result = code.replace(internalRegex.whiteSpace, "").split("\n");
+			console.log(result[0].indexOf("<script>"))
+			if (result[0].indexOf("<!--") > -1) {
+				result[0] = result[0].replace("<!--", "");
+			}
+			if (result[0].indexOf("<script>") > -1) {
+				result[0] = result[0].replace("<script>", "");
+			}
+			if (result[result.length - 1].indexOf("-->") > -1) {
+				result[result.length - 1] = result[result.length - 1].replace("-->", "");
+			}
+			if (result[result.length - 1].indexOf("</script>") > -1) {
+				result[result.length - 1] = result[result.length - 1].replace("</script>", "");
+			}
+			return result.join("\n").replace(internalRegex.whiteSpace, "");
+		}
+		code = formatCode();
+		/**
+		 * Functions defined outside of all loops in order to prevent having to recreate them repeatedly.
+		 */
+		var offsetFunctions = [];
+		offsetFunctions[0] = function(string, offset) {
+			data.link[offset] = string;
+			return "~{link-" + offset + "}~";
+		};
+		offsetFunctions[1] = function(string) {
+			var zero = 0;
+			var originalString = string;
+			if (string.match(internalRegex.quote)) {
+				string = string.replace(internalRegex.quote, function(string, offset) {
+					return "~{quote-" + zero + "}~";
+				});
+			}
+			if (string.match(internalRegex.ampersand)) {
+				string = string.replace(internalRegex.ampersand, function(string, offset) {
+					return "~{ampersand-" + zero + "}~";
+				});
+			}
+			if (string.match(internalRegex.lessthan)) {
+				string = string.replace(internalRegex.lessthan, function(string, offset) {
+					return "~{lessthan-" + zero + "}~";
+				});
+			}
+			if (string.match(internalRegex.greaterthan)) {
+				string = string.replace(internalRegex.greaterthan, function(string, offset) {
+					return "~{greaterthan-" + zero + "}~";
+				});
+			}
+			return string
+		};
+		offsetFunctions[2] = function(string, offset) {
+			data.link[offset] = "<a href=\"" + string + "\">" + string + "</a>";
+			return "~{link-" + offset + "}~";
+		};
+		offsetFunctions[3] = function(string, offset, code) {
+			if (badChars.indexOf(code.charAt(offset - 1)) > -1 || code.charAt(offset - 1) === "\"") {
+				return string;
+			}
+			var match = false;
+			if (type === "string" && regex.escaped && string.match(regex.escaped)) {
+				match = true;
+				//parse escaped characters
+				string = string.replace(regex.escaped, offsetFunctions[8]);
+			}
+			/**
+			 * Parse html enabling code out of equation
+			 */
+			string = offsetFunctions[1](string);
+			data[type][offset] = string;
+			return "~{" + type + "-" + offset + "}~";
+		};
+		offsetFunctions[4] = function(string) {
+
+			return "</span>" + string + "<span class=\"" + style + "\">";
+		};
+		offsetFunctions[5] = function(string) {
+			/**
+			 * Parse html enabling code out of equation
+			 */
+			var newString = offsetFunctions[1](string);
+			data.code[e] = "<span class=\"" + regexList[i].css + "\">" + newString + "</span>";
+			e = e + 1;
+			return "~{code-" + (e - 1) + "}~";
+		};
+		offsetFunctions[6] = function(string, name, number) {
+			return data[name][number];
+		};
+		offsetFunctions[7] = function(string, offset, code) {
+			//parse escaped characters
+			if (regex.escaped) {
+				string = string.replace(regex.escaped, offsetFunctions[8]);
+			}
+			/**
+			 * Remove any brackets that may cause the browser to parse the code as html
+			 */
+			var newString = offsetFunctions[1](string);
+			data.code[e] = "<span class=\"regex\">" + newString + "</span>";
+			e = e + 1;
+			return "~{code-" + (e - 1) + "}~";
+		};
+		offsetFunctions[8] = function(string) {
+			/**
+			 * Remove any brackets that may cause the browser to parse the code as html
+			 */
+			var newString = offsetFunctions[1](string);
+			data.escaped[e] = "<span class=\"constant\">" + newString + "</span>";
+			e = e + 1;
+			return "~{escaped-" + (e - 1) + "}~";
+		};
+		offsetFunctions[9] = function(string, offset, code) {
+			if (badChars.indexOf(code.charAt(offset - 1)) > -1) {
+				return string;
+			}
+			//parse escaped characters
+			if (regex.escaped) {
+				string = string.replace(regex.escaped, offsetFunctions[8]);
+			}
+			/**
+			 * Remove any brackets that may cause the browser to parse the code as html
+			 */
+			var newString = offsetFunctions[1](string);
+			data.code[e] = "<span class=\"regex\">" + newString + "</span>";
+			e = e + 1;
+			return "~{code-" + (e - 1) + "}~";
+		};
+		/**
+		 * remove any unnecessary formatting
+		 */
+		if (options && options.all.indexOf("parsed") > -1) {
+			code = code.replace(/&amp;/ig, "&");
+			code = code.replace(/&lt;/ig, "<");
+			code = code.replace(/&gt;/ig, ">");
+		}
+		/**
+		 * save links
+		 */
+		code = code.replace(regex.link, offsetFunctions[0])
+		/**
+		 * Used to fix issue caused by <pre><code class="">...</code></pre> being within the code.
+		 * The browser would read the tags and implement them, causing undesired effects.
+		 * In reality we want the tags to show up as text, not be rendered.
+		 */
+
+		/**
+		 * Interpret urls as links.
+		 */
+		if (code.match(regex.url)) {
+			code = code.replace(regex.url, offsetFunctions[2]);
+		}
+		/**
+		 * Comment and String parsing are practically the same, with different parameters being the only difference, so we optomize by using this loop to avoid code duplication.
+		 * Comment and string regex to look for is provided by the language definition.
+		 */
+		for (i = 0; i < types.length; i++) {
+			type = types[i];
+			/**
+			 * Match regex before comments so that they are mapped out properly
+			 */
+			if (type === "string" && code.match(regex.regex1)) {
+				code = code.replace(regex.regex1, offsetFunctions[9]);
+			}
+			if (code.match(regex[type])) {
+				code = code.replace(regex[type], offsetFunctions[3]);
+				for (attr in data[type]) {
+					/**
+					 * If Object.prototype has been modified we need the below line.
+					 */
+					if (data[type].hasOwnProperty(attr)) {
+						if (type.indexOf("Comment") > -1) {
+							var style = "comment";
+						} else {
+							var style = "string";
+						}
+						data[type][attr] = "<span class=\"" + style + "\">" + data[type][attr];
+						if (data[type][attr].match(regex.newline)) {
+							data[type][attr] = data[type][attr].replace(regex.newline, offsetFunctions[4]);
+						}
+						data[type][attr] = data[type][attr] + "</span>";
+					}
+				}
+			}
+			if (type === "string" && code.match(regex.regex2)) {
+				code = code.replace(regex.regex2, offsetFunctions[7]);
+			}
+		}
+		/**
+		 * Run through each custom defined regex used by the language.
+		 */
+		for (i = 0; i < regexList.length; i++) {
+			if (code.match(regexList[i].regex)) {
+				code = code.replace(regexList[i].regex, offsetFunctions[5]);
+			}
+		}
+		/**
+		 * Replace all temporary code placeholders with the parsed values. This prevents duplicate parsing.
+		 */
+		while (code.match(regex.temporary)) {
+			code = code.replace(internalRegex.temporary, offsetFunctions[6]);
+		}
+		// if(regex.escaped) {
+		// 	code = code.replace(regex.escaped, offsetFunctions[8]);
+		// }
+		/**
+		 * Split newlines into list items for proper numbering.
+		 */
+		if (code.match(regex.newline)) {
+			code = code.split(regex.newline);
+			code = code.join("</span></li><li><span>");
+		}
+		code = "<li><span>" + code + "</span></li>";
+		/**
+		 * Replace pre tag code with parsed code.
+		 */
+		element.innerHTML = (start + code + end);
+		/**
+		 * Style for newlines.
+		 */
+		if (options && ((options[selector] && options[selector].indexOf("nolines") > -1) || options.all.indexOf("nolines") > -1)) {
+			element.children[0].style.marginLeft = "5px";
+			element.children[0].style.listStyleType = "none";
+		} else {
+			lines = ((originalCode.indexOf("\n") !== -1) ? originalCode.split("\n") : originalCode.split("\r")).length;
+			if (lines > 100) {
+				if (lines > 1000) {
+					element.children[0].style.marginLeft = "5em";
+				} else {
+					element.children[0].style.marginLeft = "4em";
+				}
+			}
+		}
+	};
 	highlightJavascript.getKeywords = function(str) {
 		str = str.join(" ");
 		str = str.replace(/^\s+|\s+$/g, '').replace(/\s+/g, '|');
@@ -408,7 +416,7 @@
 					"all": ["nolines"]
 				};
 			}
-			if(options === "parsed") {
+			if (options === "parsed") {
 				formattedOptions = {
 					"all": ["parsed"]
 				};
