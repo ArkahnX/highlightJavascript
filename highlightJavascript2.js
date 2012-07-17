@@ -1,8 +1,8 @@
-(function (window) {
+(function(window) {
 	"use strict";
 	var document = window.document;
 	if (typeof document.querySelector === "function") {
-		var flatten = function (array) {
+		var flatten = function(array) {
 			var returnValue = [];
 			var temporaryFlatArray;
 			var i = 0;
@@ -21,101 +21,105 @@
 		};
 		var internalRegex = {
 			/**
-			* regex without whitespace
-			* matches /
-			* is not followed by a *
-			* must contain one or more of pretty much anything
-			* has a /
-			* optional flags
-			* is not followed by spaces, letters or numbers.
-			* case insensitive.
-			*/
-			regex1: /\/(?![\*])(?:[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,<\.\>\/\?a-z0-9])+\/[gim]*(?=\,|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
+			 * regex without whitespace
+			 * matches /
+			 * is not followed by a *
+			 * must contain one or more of pretty much anything
+			 * has a /
+			 * optional flags
+			 * is not followed by spaces, letters or numbers.
+			 * case insensitive.
+			 */
+			regex1: /\/(?![\*])[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,<\.\>\/\?]*[a-z0-9]*\/[gim]*(?![a-z0-9\040])(?=\,|\;|\]|\)|\}|\n|\r|\n\r|$)/gi,
 			/**
-			* regex with whitespace
-			* matches /
-			* is not followed by a *
-			* must contain one or more of pretty much anything
-			* has a /
-			* optional flags
-			* is not followed by spaces, letters or numbers.
-			* case insensitive.
-			*/
-			regex2: /\/(?![\*])(?:\040*[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,<\.\>\/\?a-z0-9])+\/[gim]*(?=\,|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
+			 * regex with whitespace
+			 * matches /
+			 * is not followed by a *
+			 * must contain one or more of pretty much anything
+			 * has a /
+			 * optional flags
+			 * is not followed by spaces, letters or numbers.
+			 * case insensitive.
+			 */
+			regex2: /\/(?![\*])\040*[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\{\]\}\\\|\;\:\'\"\,<\.\>\/\?]*[a-z0-9]*\/[gim]*(?=\,|\;|\]|\)|\}|\n|\r|\n\r|$)(?![a-z0-9\040])/gi,
 			/**
-			* numbers
-			*/
+			 * numbers
+			 */
 			number: /[\+\-]?\b(?:(?:0x[A-Fa-f0-9]+)|(?:(?:[\d]*\.)?[\d]+(?:[eE][\+\-]?[\d]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\b/g,
 			/**
-			* matches and forgets '
-			* matches and forgets ' or \
-			* matches and forgets \ and all characters
-			* matches and forgets '
-			* or
-			* matches and forgets "
-			* matches and forgets " or \
-			* matches and forgets \ and all characters
-			* matches and forgets "
-			*/
+			 * matches and forgets '
+			 * matches and forgets ' or \
+			 * matches and forgets \ and all characters
+			 * matches and forgets '
+			 * or
+			 * matches and forgets "
+			 * matches and forgets " or \
+			 * matches and forgets \ and all characters
+			 * matches and forgets "
+			 */
 			string: /(?:'[^'\\]*(?:\\.[^'\\]*)*')|(?:"[^"\\]*(?:\\.[^"\\]*)*")/g,
 			/**
-			* matches and remembers (1) whitespace
-			* matches and remembers (1) one character of a letter, number or whitespace
-			* matches and remembers (2) //
-			* matches and remembers (2) all characters until new line
-			* case insensitive
-			*/
+			 * matches and remembers (1) whitespace
+			 * matches and remembers (1) one character of a letter, number or whitespace
+			 * matches and remembers (2) //
+			 * matches and remembers (2) all characters until new line
+			 * case insensitive
+			 */
 			singlecomment: /\/\/.+?(?=\n|\r|$)/ig,
 			/**
-			* matches / *
-			* matches any whitespace and non whitespace
-			* matches * /
-			*/
+			 * matches / *
+			 * matches any whitespace and non whitespace
+			 * matches * /
+			 */
 			multicomment: /\/\*[\s\S]+?\*\//g,
 			/**
-			* matches whitespace before or after string
-			*/
+			 * matches whitespace before or after string
+			 */
 			whitespace: /^\s+|\s+$/g,
 			/**
-			* matches any carage return
-			*/
-			newline: /[\n\r]/g,
+			 * matches any carage return
+			 */
+			newline: /([\n\r])/g,
 			/**
-			* matches "
-			*/
+			 * matches any carage return
+			 */
+			newlinenocapture: /[\n\r]/g,
+			/**
+			 * matches "
+			 */
 			quote: /"/g,
 			/**
-			* matches <
-			*/
+			 * matches <
+			 */
 			lessthan: /</g,
 			/**
-			* matches >
-			*/
+			 * matches >
+			 */
 			greaterthan: />/g,
 			/**
-			* matches &
-			*/
+			 * matches &
+			 */
 			ampersand: /&/g,
 			/**
-			* matches <a
-			* with href="..."
-			* and other attributes
-			* matches >
-			* matches text
-			* matches </a>
-			*/
+			 * matches <a
+			 * with href="..."
+			 * and other attributes
+			 * matches >
+			 * matches text
+			 * matches </a>
+			 */
 			link: /<a\b href="[htpfs]+:\/\/[^"]+"[^>]*>(?:.*?)<\/a>/g,
 			/**
-			* matches <
-			* matches and forgets ! or /
-			* matches alpha-numeric tag name
-			* matches and forgets attributes
-			* matches >
-			*/
+			 * matches <
+			 * matches and forgets ! or /
+			 * matches alpha-numeric tag name
+			 * matches and forgets attributes
+			 * matches >
+			 */
 			tag: /<(?:\!|\/)?[a-z][a-z0-1\-]\s*(?:[^>]+)?\>/ig,
 			/**
-			* matches url
-			*/
+			 * matches url
+			 */
 			url: /(?:http|ftp|https):\/\/[\w\-_]+(?:\.[\w\-_]+)+(?:[\w\-\.,@?\^=%&amp;:\/~\+#]*[\w\-@?\^=%&amp;\/~\+#])?/g
 		};
 		var defaultProperties = {
@@ -128,7 +132,8 @@
 			"endtag": "-->",
 			"language": "javascript",
 			"showlinenumbers": true,
-			"preparsed": false
+			"preparsed": false,
+			"output": null
 		};
 		var currentData = {
 			minimumStart: 0,
@@ -141,15 +146,26 @@
 		};
 		var stringRegex = /^[0-9]*[a-z]+[0-9]*$/ig;
 		var highlightJavascript = function(node, options) {
-			var lines;
+			var data, lines, output;
+			if (node.innerHTML === "") {
+				data = node.value;
+			} else {
+				data = node.innerHTML;
+			}
+			if (options.output !== null) {
+				output = document.querySelector(options.output);
+			} else {
+				output = node;
+			}
 			currentData = {
 				minimumStart: 0,
-				processed: [node.innerHTML],
+				processed: [data],
 				initialLength: 0,
 				options: options,
 				language: highlightJavascript.language[options.language],
 				data: node.innerHTML,
-				node: node
+				node: node,
+				output: output
 			};
 			for (var attr in currentData.language.regex) {
 				if (currentData.language.regex.hasOwnProperty(attr)) {
@@ -179,39 +195,39 @@
 				highlightJavascript.parseQue();
 			}
 			var parsed = highlightJavascript.mergeResults();
-			if (parsed.match(internalRegex.newline)) {
-				parsed = parsed.split(internalRegex.newline);
+			if (parsed.match(internalRegex.newlinenocapture)) {
+				parsed = parsed.split(internalRegex.newlinenocapture);
 				parsed = parsed.join("</span></li><li><span>");
 			}
 			parsed = "<ol><li><span>" + parsed + "</span></li></ol>";
-			currentData.node.parsed = parsed;
-			currentData.node.unparsed = currentData.data;
-			currentData.node.parse = function() {
+			currentData.output.parsed = parsed;
+			currentData.output.unparsed = currentData.data;
+			currentData.output.parse = function() {
 				if (this.innerHTML === this.parsed) {
 					console.warn("Already ran highlightJavascript on this node.");
 				} else {
 					this.innerHTML = this.parsed;
 				}
 			};
-			currentData.node.unparse = function() {
+			currentData.output.unparse = function() {
 				if (this.innerHTML === this.unparsed) {
 					console.warn("Already ran highlightJavascript on this node.");
 				} else {
 					this.innerHTML = this.unparsed;
 				}
 			};
-			currentData.node.innerHTML = parsed;
+			currentData.output.innerHTML = parsed;
 			//show line numbers
 			if (currentData.options.showlinenumbers === false) {
-				currentData.node.children[0].style.marginLeft = "5px";
-				currentData.node.children[0].style.listStyleType = "none";
+				currentData.output.children[0].style.marginLeft = "5px";
+				currentData.output.children[0].style.listStyleType = "none";
 			} else {
 				lines = ((currentData.data.indexOf("\n") !== -1) ? currentData.data.split("\n") : currentData.data.split("\r")).length;
 				if (lines > 100) {
 					if (lines > 1000) {
-						currentData.node.children[0].style.marginLeft = "5em";
+						currentData.output.children[0].style.marginLeft = "5em";
 					} else {
-						currentData.node.children[0].style.marginLeft = "4em";
+						currentData.output.children[0].style.marginLeft = "4em";
 					}
 				}
 			}
@@ -238,7 +254,7 @@
 			return finalString;
 		};
 		highlightJavascript.parseQue = function() {
-			var i=0;
+			var i = 0;
 			var que = ["link"];
 			if (currentData.options.findregex) {
 				que.push("regex1");
@@ -297,7 +313,7 @@
 			var matches = currentData.processed[currentData.minimumStart].match(regex);
 			var parsedString = [currentData.processed[currentData.minimumStart]];
 
-			var match, regexMatch, splitString, gaps, filled, i, e, r;
+			var match, regexMatch, splitString, gaps, filled, i, e, r, before, after;
 			for (i = 0; i < matches.length; i++) {
 				match = highlightJavascript.process[type](matches[i]);
 				for (e = 0; e < parsedString.length; e++) {
@@ -307,19 +323,27 @@
 						} else {
 							regexMatch = matches[i];
 						}
-						if (parsedString[e].indexOf(matches[i]) > -1) {
+						if(type[0] === "string" && regexMatch.match(/\/[gim]*/)) {
+							// this means there is a regular expression in the string. Bad!
+						} else if (parsedString[e].indexOf(matches[i]) > -1) {
 							if (parsedString[e].split(regexMatch)[0] !== parsedString[e]) {
 								splitString = parsedString[e].split(regexMatch);
-								gaps = splitString.length - 1;
-								filled = 0;
-								for (r = splitString.length; r > 0; r--) {
-									splitString.splice(r - 1, 0, match);
-									filled = filled + 1;
-									if (filled === gaps) {
-										r = 0;
+								before = parsedString[e].split(regexMatch)[0];
+								before = before.charAt(before.length - 1);
+								after = parsedString[e].split(regexMatch)[1];
+								after = after.charAt(0);
+								if (before !== "\\" && before !== "*") {
+									gaps = splitString.length - 1;
+									filled = 0;
+									for (r = splitString.length; r > 0; r--) {
+										splitString.splice(r - 1, 0, match);
+										filled = filled + 1;
+										if (filled === gaps) {
+											r = 0;
+										}
 									}
+									parsedString[e] = splitString;
 								}
-								parsedString[e] = splitString;
 							}
 						}
 					}
@@ -335,7 +359,7 @@
 			};
 			var matches = currentData.processed[currentData.minimumStart].match(regex);
 			var parsedString = [currentData.processed[currentData.minimumStart]];
-			var match, regexMatch, splitString, gaps, filled, i, e, r;
+			var match, regexMatch, splitString, gaps, filled, i, e, r, before;
 			for (i = 0; i < matches.length; i++) {
 				match = internalFunction(matches[i], style);
 				for (e = 0; e < parsedString.length; e++) {
@@ -348,16 +372,20 @@
 						if (parsedString[e].indexOf(matches[i]) > -1) {
 							if (parsedString[e].split(regexMatch)[0] !== parsedString[e]) {
 								splitString = parsedString[e].split(regexMatch);
-								gaps = splitString.length - 1;
-								filled = 0;
-								for (r = splitString.length; r > 0; r--) {
-									splitString.splice(r - 1, 0, match);
-									filled = filled + 1;
-									if (filled === gaps) {
-										r = 0;
+								before = parsedString[e].split(regexMatch)[0];
+								before = before.charAt(before.length - 1);
+								if (before !== "\\") {
+									gaps = splitString.length - 1;
+									filled = 0;
+									for (r = splitString.length; r > 0; r--) {
+										splitString.splice(r - 1, 0, match);
+										filled = filled + 1;
+										if (filled === gaps) {
+											r = 0;
+										}
 									}
+									parsedString[e] = splitString;
 								}
-								parsedString[e] = splitString;
 							}
 						}
 					}
@@ -519,27 +547,29 @@
 			return parsedString;
 		};
 		highlightJavascript.init = function(nodes, propertiesObject) {
-			if (propertiesObject) {
-				for (var attr in defaultProperties) {
-					if (defaultProperties.hasOwnProperty(attr)) {
-						if (propertiesObject[attr] !== undefined && (propertiesObject[attr] !== defaultProperties[attr])) {
-							defaultProperties[attr] = propertiesObject[attr];
-						}
+			if (!propertiesObject) {
+				var propertiesObject = {};
+			}
+			for (var attr in defaultProperties) {
+				if (defaultProperties.hasOwnProperty(attr)) {
+					if (propertiesObject[attr] === undefined) {
+						propertiesObject[attr] = defaultProperties[attr];
 					}
 				}
 			}
-			if (defaultProperties.selector === "" && nodes !== "all") {
-				defaultProperties.selector = "pre code[data-type=\"" + defaultProperties.language + "\"]";
-			} else if (nodes === "all" && defaultProperties.selector === "") {
-				defaultProperties.selector = "pre code[data-type]";
+
+			if (propertiesObject.selector === "" && nodes !== "all") {
+				propertiesObject.selector = "pre code[data-type=\"" + propertiesObject.language + "\"]";
+			} else if (nodes === "all" && propertiesObject.selector === "") {
+				propertiesObject.selector = "pre code[data-type]";
 			}
 			if (nodes === "all") {
-				nodes = document.querySelectorAll(defaultProperties.selector);
+				nodes = document.querySelectorAll(propertiesObject.selector);
 			} else if (typeof nodes === "string") {
 				nodes = document.querySelectorAll(nodes);
 			}
 			for (var i = 0; i < nodes.length; i++) {
-				highlightJavascript(nodes[i], defaultProperties);
+				highlightJavascript(nodes[i], propertiesObject);
 			}
 		};
 		highlightJavascript.getKeywords = function(array) {

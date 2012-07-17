@@ -22,49 +22,49 @@ ol {
 	white-space: -hp-pre-wrap;
 	word-wrap: break-word;
 }
-pre code li {
+ol li {
 	font-family: Consolas, "Courier New";
 	color:rgba(125, 125, 125, 0.95686);
 	background-color:rgba(238,238,238,0.9215);
 }
-pre code li span {
+ol li span {
 	font-family:Consolas, "Courier New";
 	color:black;
 }
-pre code li.highlighted {
+ol li.highlighted {
 	background-color:rgba(0,0,0,0.10196);
 }
-pre code .comment {
+ol li span.comment {
 	color:#0066FF;
 	font-style: italic;
 }
-pre code .string {
+ol li span.string {
 	color:#009933;
 }
-pre code .number {
+ol li span.number {
 	color:#0066FF;
 }
-pre code .native {
+ol li span.native {
 	color:#0000FF;
 	font-weight:bold;
 }
-pre code .constructs {
+ol li span.constructs {
 	color:#0000FF;
 }
-pre code .language {
+ol li span.language {
 	color:#9700CC;
 }
-pre code .reserved {
+ol li span.reserved {
 	color:#000000;
 	font-weight: bold;
 }
-pre code .constant {
+ol li span.constant {
 	color:#6782D3;
 }
-pre code .function {
+ol li span.function {
 	color:#FF8000;
 }
-pre code .regex {
+ol li span.regex {
 	color:#FF0080;
 }
 
