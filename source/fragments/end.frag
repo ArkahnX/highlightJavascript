@@ -1,0 +1,2 @@
+window.highlightJavascript = highlightJavascript;
+}(window));
