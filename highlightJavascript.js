@@ -6,6 +6,7 @@
 	"use strict";
 	var document = window.document;
 	var highlightJavascript = function(input, options, language) {
+		console.log(input)
 		var lines, marginLeft, type, name, id, attr;
 		var element = input;
 		var selector = input.id;
@@ -173,7 +174,7 @@
 		 */
 		var formatCode = function() {
 			var result = code.replace(internalRegex.whiteSpace, "").split("\n");
-			console.log(result[0].indexOf("<script>"))
+			// console.log(result[0].indexOf("<script>"))
 			if (result[0].indexOf("<!--") > -1) {
 				result[0] = result[0].replace("<!--", "");
 			}
